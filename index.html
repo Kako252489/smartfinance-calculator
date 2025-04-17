@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SmartFinance - Calculator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module">
+    import { createApp, defineComponent } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+    import { createRouter, createWebHashHistory } from 'https://unpkg.com/vue-router@4/dist/vue-router.esm-browser.js';
+
+    const AppHeader = defineComponent({
+      template: `
+        <header class='container'>
+          <div class='header-left'>
+            <router-link to='/' class='nav-link'>Home</router-link>
+            <div class='logo'>Smart<span>Finance</span></div>
+          </div>
+          <div class='header-right'>
+            <router-link to='/spending' class='nav-link'>Spending</router-link>
+            <router-link to='/calculators' class='nav-link'>Calculators</router-link>
+            <router-link to='/budget' class='nav-link'>Budget Tools</router-link>
+            <button class='login-btn'>Login / Sign Up</button>
+          </div>
+        </header>
+      `
+    });
+
+    const CalculatorSection = defineComponent({
+      template: `
+        <main class='container calculator-section'>
+          <div class='calculator'>
+            <h3>Wage Calculator (by State)</h3>
+            <label>State</label>
+            <select v-model='state'>
+              <option value='CA'>California</option>
+              <option value='TX'>Texas</option>
+              <option value='NY'>New York</option>
+            </select>
+            <label>Hours / Week</label>
+            <input type='number' v-model.number='hours' />
+            <label>Hourly Rate ($)</label>
+            <input type='number' v-model.number='rate' />
+            <button @click='calculateWage'>Calculate</button>
+            <div class='result'>{{ wageResult }}</div>
+          </div>
+
+          <div class='calculator'>
+            <h3>Car Payment Calculator</h3>
+            <label>Car Price ($)</label>
+            <input type='number' v-model.number='carPrice' />
+            <label>Interest Rate (%)</label>
+            <input type='number' v-model.number='carRate' />
+            <label>Loan Term (Years)</label>
+            <input type='number' v-model.number='carYears' />
+            <button @click='calculateCarPayment'>Calculate</button>
+            <div class='result'>{{ carPaymentResult }}</div>
+          </div>
+
+          <div class='calculator'>
+            <h3>Mortgage Calculator</h3>
+            <label>Home Price ($)</label>
+            <input type='number' v-model.number='homePrice' />
+            <label>Interest Rate (%)</label>
+            <input type='number' v-model.number='mortgageRate' />
+            <label>Loan Term (Years)</label>
+            <input type='number' v-model.number='mortgageYears' />
+            <button @click='calculateMortgage'>Calculate</button>
+            <div class='result'>{{ mortgageResult }}</div>
+          </div>
+        </main>
+      `,
+      data() {
+        return {
+          state: 'CA',
+          hours: 40,
+          rate: 15,
+          carPrice: 0,
+          carRate: 0,
+          carYears: 5,
+          homePrice: 0,
+          mortgageRate: 0,
+          mortgageYears: 30,
+          wageResult: '',
+          carPaymentResult: '',
+          mortgageResult: ''
+        };
+      },
+      methods: {
+        calculateWage() {
+          const weekly = this.hours * this.rate;
+          const monthly = weekly * 4;
+          const yearly = weekly * 52;
+          this.wageResult = `Monthly: $${monthly.toFixed(2)}, Yearly: $${yearly.toFixed(2)}`;
+        },
+        calculateCarPayment() {
+          const rate = this.carRate / 100 / 12;
+          const months = this.carYears * 12;
+          const payment = (this.carPrice * rate) / (1 - Math.pow(1 + rate, -months));
+          this.carPaymentResult = `Monthly Payment: $${payment.toFixed(2)}`;
+        },
+        calculateMortgage() {
+          const rate = this.mortgageRate / 100 / 12;
+          const months = this.mortgageYears * 12;
+          const payment = (this.homePrice * rate) / (1 - Math.pow(1 + rate, -months));
+          this.mortgageResult = `Monthly Payment: $${payment.toFixed(2)}`;
+        }
+      }
+    });
+
+    const routes = [
+      { path: '/', redirect: '/calculators' },
+      { path: '/spending', component: { template: '<div class="container">Spending Page</div>' } },
+      { path: '/budget', component: { template: '<div class="container">Budget Tools Page</div>' } },
+      { path: '/calculators', component: CalculatorSection }
+    ];
+
+    const router = createRouter({
+      history: createWebHashHistory(),
+      routes
+    });
+
+    const App = defineComponent({
+      components: { AppHeader },
+      template: '<AppHeader /><router-view />'
+    });
+
+    createApp(App).use(router).mount('#app');
+  </script>
+</body>
+</html>
